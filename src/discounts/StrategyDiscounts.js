@@ -7,17 +7,17 @@
 // }
 
 class NoDiscount {
-  apply(total) {
+  apply(total, items) {
     return total;
   }
-}
+} 
 
 class PercentageDiscount {
   constructor(percent) {
     this.percent = percent;
   }
 
-  apply(total) {
+  apply(total, items) {
     return total * (1 - this.percent);
   }
 }
@@ -27,10 +27,24 @@ class FlatAmountDiscount {
     this.amount = amount;
   }
 
-  apply(total) {
+  apply(total, items) {
     return Math.max(0, total - this.amount);
   }
 }
+
+class BuyOneGetOneDiscount {
+  apply(total, items) {
+    let discount = 0;
+
+    items.forEach((item) => {
+      const freeUnits = Math.floor(item.quantity / 2);
+      discount += freeUnits * item.price;
+    });
+
+    return Math.max(0, total - discount);
+  }
+}
+
 
 // List of available strategies for the UI
 export const DISCOUNT_STRATEGIES = [
@@ -57,5 +71,17 @@ export const DISCOUNT_STRATEGIES = [
     label: "Flat $5 off",
     description: "Take $5 off any order.",
     strategy: new FlatAmountDiscount(5)
+  },
+  {
+    id: "veteran20",
+    label: "Veteran 20% off",
+    description: "20% off the subtotal for veterans.",
+    strategy: new PercentageDiscount(0.2)
+  },
+  {
+    id: "bogo", 
+    label: "Buy 1 Get 1 Free",
+    description: "Every second item of the same product is free.",
+    strategy: new BuyOneGetOneDiscount()
   }
 ];

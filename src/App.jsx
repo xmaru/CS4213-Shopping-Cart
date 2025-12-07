@@ -86,9 +86,14 @@ export default function App() {
 
   // Apply selected discount strategy
   const finalTotal = useMemo(
-    () => currentDiscountConfig.strategy.apply(subtotal.rawTotal),
-    [currentDiscountConfig, subtotal]
-  );
+  () =>
+    currentDiscountConfig.strategy.apply(
+      subtotal.rawTotal,
+      cartItems
+    ),
+  [currentDiscountConfig, subtotal, cartItems]
+);
+
 
   return (
     <div className="app">

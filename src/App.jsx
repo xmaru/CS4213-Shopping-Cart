@@ -1,12 +1,19 @@
 import { useState, useMemo } from "react";
-import { PRODUCTS } from "./data/products";
 import ProductList from "./components/ProductList";
 import Cart from "./components/Cart";
 import CartSummary from "./components/CartSummary";
+import { DISCOUNT_STRATEGIES } from "./discounts/StrategyDiscounts";
+import { ProductFactory } from "./factory/ProductFactory";
 
 export default function App() {
+  // Create the catalog once using the ProductFactory (Factory Method)
+  const products = useMemo(
+    () => ProductFactory.createAllProducts(),
+    []
+  );
+
   const [cartItems, setCartItems] = useState([]);
-  const [discountType, setDiscountType] = useState("none");
+  const [selectedDiscountId, setSelectedDiscountId] = useState("none");
 
   function handleAddToCart(product) {
     setCartItems((prev) => {
@@ -56,6 +63,7 @@ export default function App() {
     setCartItems([]);
   }
 
+  // Subtotal calculation
   const subtotal = useMemo(() => {
     const itemsCount = cartItems.reduce(
       (sum, item) => sum + item.quantity,
@@ -68,10 +76,24 @@ export default function App() {
     return { itemsCount, rawTotal };
   }, [cartItems]);
 
+  // Strategy selection (which discount algorithm to use)
+  const currentDiscountConfig = useMemo(
+    () =>
+      DISCOUNT_STRATEGIES.find((d) => d.id === selectedDiscountId) ??
+      DISCOUNT_STRATEGIES[0],
+    [selectedDiscountId]
+  );
+
+  // Apply selected discount strategy
+  const finalTotal = useMemo(
+    () => currentDiscountConfig.strategy.apply(subtotal.rawTotal),
+    [currentDiscountConfig, subtotal]
+  );
+
   return (
     <div className="app">
       <header className="app-header">
-        <h1>CS 4213 – Shopping Cart Prototype</h1>
+        <h1>CS 4213 | Group J – Shopping Cart Prototype</h1>
         <p className="muted">
           Demonstrating Strategy, Factory Method, and Observer using a
           mini cart.
@@ -79,7 +101,7 @@ export default function App() {
       </header>
 
       <main className="layout">
-        <ProductList products={PRODUCTS} onAdd={handleAddToCart} />
+        <ProductList products={products} onAdd={handleAddToCart} />
 
         <div className="right-column">
           <Cart
@@ -90,8 +112,12 @@ export default function App() {
           />
           <CartSummary
             subtotal={subtotal}
-            discountType={discountType}
-            onDiscountChange={setDiscountType}
+            discountOptions={DISCOUNT_STRATEGIES}
+            selectedDiscountId={selectedDiscountId}
+            onDiscountChange={setSelectedDiscountId}
+            discountLabel={currentDiscountConfig.label}
+            discountDescription={currentDiscountConfig.description}
+            finalTotal={finalTotal}
           />
         </div>
       </main>

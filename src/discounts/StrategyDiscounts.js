@@ -73,10 +73,10 @@ export const DISCOUNT_STRATEGIES = [
     strategy: new FlatAmountDiscount(5)
   },
   {
-    id: "veteran20",
-    label: "Veteran 20% off",
-    description: "20% off the subtotal for veterans.",
-    strategy: new PercentageDiscount(0.2)
+    id: "veteran15",
+    label: "Veteran 15% off",
+    description: "15% off the subtotal for veterans.",
+    strategy: new PercentageDiscount(0.15)
   },
   {
     id: "bogo", 
